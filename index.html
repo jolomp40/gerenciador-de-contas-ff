@@ -93,7 +93,7 @@
     </div>
 
     <!-- Gerenciador de Contas -->
-    <div class="container" id="account-manager">
+    <div class="container" id="account-manager" style="display: none;">
         <h1>Gerenciador de Contas FF</h1>
         <form id="account-form">
             <div class="input-group">
@@ -221,10 +221,10 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            if (loggedInUser) {
-                showAccountManager();
+            if (!loggedInUser) {
+                showLogin(); // Exibe a tela de login se o usuário não estiver logado
             } else {
-                showLogin();
+                showAccountManager(); // Exibe o gerenciador de contas se o usuário estiver logado
             }
         });
     </script>
