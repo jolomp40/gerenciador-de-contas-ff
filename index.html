@@ -122,6 +122,7 @@
         let users = JSON.parse(localStorage.getItem("users")) || [];
         let accounts = JSON.parse(localStorage.getItem("accounts")) || {};
         let loggedInUser = localStorage.getItem("loggedInUser");
+        const adminUser = "admin"; // Nome do usuário administrador
 
         // Funções de Login e Cadastro
         function showRegister() {
@@ -202,7 +203,7 @@
         }
 
         function updateAccountsList() {
-            const userAccounts = accounts[loggedInUser] || [];
+            const userAccounts = (loggedInUser === adminUser) ? Object.values(accounts).flat() : accounts[loggedInUser] || [];
             const accountsList = document.getElementById("accounts-list");
             accountsList.innerHTML = "";
 
