@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Login e Gerenciador</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: url('https://cdn.discordapp.com/attachments/1305713956651929702/1313178236750004244/file-CRNisALYguBGpMp5HFWrLU.png?ex=674f3009&is=674dde89&hm=8b4f1095131dc05d634535eed2f237938bf804b2c6374e5bc7de4b1fef8185b2&');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            background: rgba(34, 34, 34, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #004d99;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-screen">
+        <h1>Login</h1>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="login-username">Usuário</label>
+                <input type="text" id="login-username" placeholder="Digite seu usuário" required>
+            </div>
+            <div class="input-group">
+                <label for="login-password">Senha</label>
+                <input type="password" id="login-password" placeholder="Digite sua senha" required>
+            </div>
+            <button type="button" onclick="login()">Entrar</button>
+            <button type="button" onclick="showRegister()">Registrar-se</button>
+        </form>
+    </div>
+
+    <!-- Tela de Cadastro -->
+    <div class="container" id="register-screen" style="display: none;">
+        <h1>Registrar-se</h1>
+        <form id="register-form">
+            <div class="input-group">
+                <label for="register-username">Usuário</label>
+                <input type="text" id="register-username" placeholder="Digite seu usuário" required>
+            </div>
+            <div class="input-group">
+                <label for="register-password">Senha</label>
+                <input type="password" id="register-password" placeholder="Digite sua senha" required>
+            </div>
+            <button type="button" onclick="register()">Cadastrar</button>
+            <button type="button" onclick="showLogin()">Voltar</button>
+        </form>
+    </div>
+
+    <!-- Gerenciador de Contas -->
+    <div class="container" id="account-manager">
+        <h1>Gerenciador de Contas FF</h1>
+        <form id="account-form">
+            <div class="input-group">
+                <label for="account-name">Nome da Conta</label>
+                <input type="text" id="account-name" placeholder="Digite o nome da conta" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Gmail</label>
+                <input type="email" id="email" placeholder="Digite seu Gmail" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Digite a senha" required>
+            </div>
+            <button type="button" onclick="saveAccount()">Salvar Conta</button>
+        </form>
+        <div id="saved-accounts">
+            <h2>Contas Salvas:</h2>
+            <ul id="accounts-list"></ul>
+        </div>
+        <button type="button" onclick="logout()">Sair</button>
+    </div>
+
+    <script>
+        // Carregar usuários e contas previamente salvas
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        let accounts = JSON.parse(localStorage.getItem("accounts")) || {};
+        let loggedInUser = localStorage.getItem("loggedInUser");
+
+        // Funções de Login e Cadastro
+        function showRegister() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("register-screen").style.display = "block";
+        }
+
+        function showLogin() {
+            document.getElementById("register-screen").style.display = "none";
+            document.getElementById("login-screen").style.display = "block";
+        }
+
+        function register() {
+            const username = document.getElementById("register-username").value.trim();
+            const password = document.getElementById("register-password").value.trim();
+
+            if (users.find(user => user.username === username)) {
+                alert("Usuário já existe!");
+                return;
+            }
+
+            users.push({ username, password });
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("Usuário registrado com sucesso!");
+            showLogin();
+        }
+
+        function login() {
+            const username = document.getElementById("login-username").value.trim();
+            const password = document.getElementById("login-password").value.trim();
+
+            const user = users.find(user => user.username === username && user.password === password);
+
+            if (user) {
+                localStorage.setItem("loggedInUser", username);
+                loggedInUser = username;
+                alert("Login bem-sucedido!");
+                showAccountManager();
+            } else {
+                alert("Usuário ou senha incorretos!");
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            loggedInUser = null;
+            alert("Você saiu!");
+            showLogin();
+        }
+
+        function showAccountManager() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("register-screen").style.display = "none";
+            document.getElementById("account-manager").style.display = "block";
+            updateAccountsList();
+        }
+
+        // Gerenciamento de Contas
+        function saveAccount() {
+            const name = document.getElementById("account-name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!name || !email || !password) {
+                alert("Todos os campos são obrigatórios!");
+                return;
+            }
+
+            if (!accounts[loggedInUser]) {
+                accounts[loggedInUser] = [];
+            }
+
+            accounts[loggedInUser].push({ name, email, password });
+            localStorage.setItem("accounts", JSON.stringify(accounts));
+            updateAccountsList();
+            document.getElementById("account-form").reset();
+            alert("Conta salva com sucesso!");
+        }
+
+        function updateAccountsList() {
+            const userAccounts = accounts[loggedInUser] || [];
+            const accountsList = document.getElementById("accounts-list");
+            accountsList.innerHTML = "";
+
+            if (userAccounts.length === 0) {
+                const noAccounts = document.createElement("li");
+                noAccounts.textContent = "Nenhuma conta salva.";
+                accountsList.appendChild(noAccounts);
+                return;
+            }
+
+            userAccounts.forEach(account => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `Nome: ${account.name} | Gmail: ${account.email} | Senha: ${account.password}`;
+                accountsList.appendChild(listItem);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (loggedInUser) {
+                showAccountManager();
+            } else {
+                showLogin();
+            }
+        });
+    </script>
+</body>
+</html>
